@@ -114,6 +114,22 @@ public class UserJdbcDao {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         System.out.println("JDBC DAO");
         UserJdbcDao dao = new UserJdbcDao();
+        //create user
+        User john = new User("John", "Doe", "jdoe", "gefsh", "jdoe@gmail.com", "06-05-1934");
+        User jane = new User("Jane", "Doe", "jadoe", "hkdh", "jadoe@gmail.com", "06-05-1944");
+
+        dao.createUser(john);
+        dao.createUser(jane);
+        //retrieve all users
+
+        //find user by id
+
+        //delete user
+
+        //update user
+
+
+        
 //        User adam = new User("Adam", "Smith", "adams", "invisiblehand", "asmith@gmail.com", "06-05-1723");
 //        User catherine = new User("Catherine", "Wood", "cathie", "bitcoinisbig", "cwood@gmail.com", "11-26-1955");
 //        dao.createUser(adam);
