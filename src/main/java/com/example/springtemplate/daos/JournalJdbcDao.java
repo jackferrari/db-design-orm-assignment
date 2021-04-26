@@ -1,5 +1,6 @@
 package com.example.springtemplate.daos;
 
+import com.example.springtemplate.models.Article;
 import com.example.springtemplate.models.Journal;
 import com.example.springtemplate.models.Topic;
 
@@ -26,6 +27,8 @@ public class JournalJdbcDao {
   String CREATE_JOURNAL = "INSERT INTO journals VALUES (null, ?, ?, ?, ?)";
   String FIND_ALL_JOURNALS = "SELECT * FROM journals";
   String FIND_JOURNAL_BY_ID = "SELECT * FROM journals WHERE id=?";
+  String FIND_ARTICLES_BY_ID = "SELECT articles.id, articles.title, articles.content, articles.bibliography, articles.author, articles.editor, articles.journal" +
+          " FROM articles, journals WHERE id=? AND articles.journal=journals.id";
   String DELETE_JOURNAL = "DELETE FROM journals WHERE id=?";
   String UPDATE_JOURNAL = "UPDATE journals SET name=?, topic=?, release_date=?, volume=? WHERE id=?";
 
@@ -88,6 +91,26 @@ public class JournalJdbcDao {
     }
     closeConnection(connection);
     return journal;
+  }
+
+  public List<Article> findArticlesById(Integer id) throws SQLException, ClassNotFoundException {
+    List<Article> articles = new ArrayList<Article>();
+    connection = getConnection();
+    statement = connection.prepareStatement(FIND_ARTICLES_BY_ID);
+    ResultSet resultSet = statement.executeQuery();
+    while (resultSet.next()) {
+      Article article = new Article(
+              resultSet.getString("title"),
+              resultSet.getString("content"),
+              resultSet.getString("bibliography"),
+              resultSet.getInt("author"),
+              resultSet.getInt("editor"),
+              resultSet.getInt("journal")
+      );
+      articles.add(article);
+    }
+    closeConnection(connection);
+    return articles;
   }
 
   public Integer deleteJournal(Integer id) throws SQLException, ClassNotFoundException {

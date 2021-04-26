@@ -1,7 +1,6 @@
 package com.example.springtemplate.daos;
 
-import com.example.springtemplate.models.Article;
-import com.example.springtemplate.models.User;
+import com.example.springtemplate.models.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,6 +25,12 @@ public class ArticleJdbcDao {
     String CREATE_ARTICLE = "INSERT INTO articles VALUES (null, ?, ?, ?, ?, ?, ?)";
     String FIND_ALL_ARTICLES = "SELECT * FROM articles";
     String FIND_ARTICLE_BY_ID = "SELECT * FROM articles WHERE id=?";
+    String FIND_AUTHOR_BY_ARTICLE_ID = "SELECT authors.primary_topic, authors.user_id FROM" +
+            " authors, articles WHERE authors.id=? AND authors.user_id=articles.editor";
+    String FIND_EDITOR_BY_ARTICLE_ID = "SELECT editors.role, editors.user_id FROM" +
+            " editors, articles WHERE id=? AND editors.user_id=articles.editor";
+    String FIND_JOURNAL_BY_ARTICLE_ID = "SELECT journals.name, journals.topic, journals.release_date, journals.volume FROM" +
+            " journals, articles WHERE id=? AND articles.journal=journals.id";
     String DELETE_ARTICLE = "DELETE FROM articles WHERE id=?";
     String UPDATE_ARTICLE = "UPDATE articles SET title=?, content=?, bibliography=?, author=?, editor=?, journal=? WHERE id=?";
 
@@ -92,6 +97,59 @@ public class ArticleJdbcDao {
         }
         closeConnection(connection);
         return article;
+    }
+
+    public Editor findEditorByArticleId(Integer id) throws SQLException, ClassNotFoundException {
+        Editor editor = null;
+        connection = getConnection();
+        statement = connection.prepareStatement(FIND_EDITOR_BY_ARTICLE_ID);
+        statement.setInt(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        if(resultSet.next()) {
+            editor = new Editor(
+                    resultSet.getInt("id"),
+                    Role.getRoleFromString(resultSet.getString("role")),
+                    resultSet.getInt("user_id")
+            );
+        }
+        closeConnection(connection);
+        return editor;
+    }
+
+    public Journal findJournalByArticleId(Integer id) throws SQLException, ClassNotFoundException {
+        Journal journal = null;
+        connection = getConnection();
+        statement = connection.prepareStatement(FIND_JOURNAL_BY_ARTICLE_ID);
+        statement.setInt(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        if(resultSet.next()) {
+            journal = new Journal(
+                    resultSet.getInt("id"),
+                    resultSet.getString("name"),
+                    Topic.getTopicFromString(resultSet.getString("topic")),
+                    resultSet.getString("release_date"),
+                    resultSet.getInt("user_id")
+            );
+        }
+        closeConnection(connection);
+        return journal;
+    }
+
+    public Author findAuthorByArticleId(Integer id) throws SQLException, ClassNotFoundException {
+        Author author = null;
+        connection = getConnection();
+        statement = connection.prepareStatement(FIND_AUTHOR_BY_ARTICLE_ID);
+        statement.setInt(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        if(resultSet.next()) {
+            author = new Author(
+                    resultSet.getInt("id"),
+                    Topic.getTopicFromString(resultSet.getString("primary topic")),
+                    resultSet.getInt("user_id")
+            );
+        }
+        closeConnection(connection);
+        return author;
     }
     
     public Integer deleteArticle(Integer articleId) throws SQLException, ClassNotFoundException {
